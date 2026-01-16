@@ -6,6 +6,8 @@ USER_NAME := $(shell whoami)
 USER_ID := $(shell id -u)
 GROUP_ID := $(shell id -g)
 
+.PHONY: default build up exec down logs
+
 default:
 	@echo "Welcome to LaravelOrbStack Project!! $(USER_NAME)"
 
@@ -23,3 +25,9 @@ up:
 
 exec:
 	docker compose exec -it php bash
+
+down:
+	docker compose down
+
+logs:
+	docker compose logs -f
