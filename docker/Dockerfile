@@ -62,6 +62,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 RUN mkdir -p /data
 
+VOLUME ["/data"]
+
 ENV MINIO_ROOT_USER=admin \
     MINIO_ROOT_PASSWORD=password \
     BUCKET_NAME=my-bucket
