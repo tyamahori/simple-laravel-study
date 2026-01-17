@@ -36,3 +36,36 @@ ENV APACHE_RUN_USER=${USER_NAME} \
     APACHE_RUN_GROUP=${USER_NAME} \
     APACHE_LOG_DIR=/var/www/html/storage/logs
 USER ${USER_NAME}
+
+FROM golang:1.25.6-trixie AS go
+
+# MinIO Serverのインストール
+FROM go AS minio
+RUN go install -v github.com/minio/minio@RELEASE.2025-10-15T17-29-55Z
+
+# MinIO Client (mc) のインストール
+FROM go AS mc
+RUN go install -v github.com/minio/mc@RELEASE.2025-08-13T08-35-41Z
+
+FROM debian:trixie-slim AS s3mock
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=minio /go/bin/minio /usr/local/bin/minio
+COPY --from=mc /go/bin/mc /usr/local/bin/mc
+
+COPY s3mock-entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+RUN mkdir -p /data
+
+ENV MINIO_ROOT_USER=admin \
+    MINIO_ROOT_PASSWORD=password \
+    BUCKET_NAME=my-bucket
+
+EXPOSE 9000 9001 80
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

@@ -5,6 +5,7 @@ x-common-settings: &healthcheck-settings
   retries: 30
 volumes:
   mysql:
+  s3mock:
 services:
   mysql:
     networks:
@@ -56,6 +57,27 @@ services:
         "mail.local"
       ]
       <<: *healthcheck-settings
+
+  storage:
+    image: laravel-sutdy/s3mock:202601
+    networks:
+      default:
+        aliases:
+          - storage.local
+          - sample.storage.local
+    ports:
+      - "127.0.0.1:9001:80" # 管理画面用ポート
+      # - "9000:9000" # API用ポート
+    environment:
+      # ここでバケット名や認証情報を変更できます
+      MINIO_ROOT_USER: "sample"
+      MINIO_ROOT_PASSWORD: "samplesample"
+      BUCKET_NAME: "sample"
+      MINIO_DOMAIN: "storage.local"
+    volumes:
+      - type: volume
+        source: s3mock
+        target: /data
 
   php:
     networks:
