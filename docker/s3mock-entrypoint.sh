@@ -11,8 +11,15 @@ MINIO_PID=$!
 
 # MinIOがAPIに応答するまで待機（ヘルスチェック）
 echo "Waiting for MinIO to become healthy..."
+TIMEOUT=10
+ELAPSED=0
 until curl -s -f http://localhost:9000/minio/health/live > /dev/null; do
     sleep 1
+    ELAPSED=$((ELAPSED + 1))
+    if [ $ELAPSED -ge $TIMEOUT ]; then
+        echo "MinIO health check timed out after ${TIMEOUT} seconds"
+        exit 1
+    fi
 done
 
 echo "MinIO is running. Configuring bucket..."
