@@ -20,11 +20,14 @@ buildPhp:
         --build-arg USER_NAME=$(USER_NAME) \
         .
 
-buildS3mock:
-	docker build -t laravel-sutdy/s3mock:202601 \
+buildS3mockRustFs:
+	docker build -t laravel-sutdy/s3mock:rustfs-202601 \
         -f docker/Dockerfile \
-        --target=s3mock \
+        --target=rustfss3mock \
         ./docker
+
+createBucket:
+	docker compose run --rm bucketCreate
 
 up:
 	docker compose up -d

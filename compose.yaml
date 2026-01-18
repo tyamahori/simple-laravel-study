@@ -58,8 +58,8 @@ services:
       ]
       <<: *healthcheck-settings
 
-  storage:
-    image: laravel-sutdy/s3mock:202601
+  rustFs:
+    image: rustfs/rustfs:1.0.0-alpha.80
     networks:
       default:
         aliases:
@@ -69,15 +69,38 @@ services:
       - "127.0.0.1:9001:80" # 管理画面用ポート
       # - "9000:9000" # API用ポート
     environment:
-      # ここでバケット名や認証情報を変更できます
-      MINIO_ROOT_USER: "sample"
-      MINIO_ROOT_PASSWORD: "samplesample"
-      BUCKET_NAME: "sample"
-      MINIO_DOMAIN: "storage.local"
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:80
+      RUSTFS_ACCESS_KEY: sample
+      RUSTFS_SECRET_KEY: samplesample
+      RUSTFS_SERVER_DOMAINS: storage.local
     volumes:
       - type: volume
         source: s3mock
         target: /data
+    healthcheck:
+      test: [
+        "CMD",
+        "curl",
+        "-f",
+        "http://storage.local:9000/health"
+      ]
+      <<: *healthcheck-settings
+
+  bucketCreate:
+    image: amazon/aws-cli:2.33.2
+    depends_on:
+      rustFs:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: sample
+      AWS_SECRET_ACCESS_KEY: samplesample
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_REGION: us-east-1
+    entrypoint: /bin/sh
+    command: -c "aws --endpoint-url http://storage.local:9000 s3api create-bucket --bucket sample || true"
+    profiles:
+      - create-bucket
 
   php:
     networks:
