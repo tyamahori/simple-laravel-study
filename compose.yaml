@@ -58,7 +58,7 @@ services:
       ]
       <<: *healthcheck-settings
 
-  rustFs:
+  storage:
     image: rustfs/rustfs:1.0.0-alpha.80
     networks:
       default:
