@@ -90,7 +90,7 @@ services:
   bucketCreate:
     image: amazon/aws-cli:2.33.2
     depends_on:
-      rustFs:
+      storage:
         condition: service_healthy
     environment:
       AWS_ACCESS_KEY_ID: sample

@@ -6,7 +6,7 @@ USER_NAME := $(shell whoami)
 USER_ID := $(shell id -u)
 GROUP_ID := $(shell id -g)
 
-.PHONY: default buildPhp buildS3mock up exec down logs downWithVolume
+.PHONY: default buildPhp up exec down logs downWithVolume
 
 default:
 	@echo "Welcome to LaravelOrbStack Project!! $(USER_NAME)"
